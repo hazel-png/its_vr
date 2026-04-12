@@ -4,23 +4,44 @@
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   </head>
   <body>
-    <a-scene webxr="optionalFeatures: local-floor, bounded-floor">
-      
-      <a-grid></a-grid> 
-      
-      <a-box position="0 1.5 -3" color="#4CC3D9" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"></a-box>
-      <a-sphere position="1 1.2 -4" radius="0.5" color="#EF2D5E"></a-sphere>
-      
-      <a-sky color="#222"></a-sky>
+<a-scene webxr="optionalFeatures: local-floor">
+  <a-box position="0 1.5 -3" color="#4CC3D9"></a-box>
+  
+  <a-entity id="camera-rig">
+    <a-camera id="my-camera" look-controls></a-camera>
+  </a-entity>
+  
+  <a-sky color="#222"></a-sky>
+</a-scene>
 
-      <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
-      
-    </a-scene>
+<script>
+  const camera = document.getElementById('my-camera');
+  const rig = document.getElementById('camera-rig');
+  let lastX = 0, lastY = 0, lastZ = 0;
+  const boost = 5; // ★ここを「10」とかにすると、もっと爆速で動けます
 
-    <script src="https://unpkg.com/aframe-environment-component@1.3.2/dist/aframe-environment-component.min.js"></script>
-    <script>
-      // シーンに地面などの環境を追加
-      document.querySelector('a-scene').setAttribute('environment', 'preset: forest');
-    </script>
+  camera.addEventListener('componentchanged', function (evt) {
+    if (evt.detail.name === 'position') {
+      const currentPos = camera.getAttribute('position');
+      
+      // 前回の位置からの差分を計算
+      let dx = currentPos.x - lastX;
+      let dy = currentPos.y - lastY;
+      let dz = currentPos.z - lastZ;
+
+      // リグの位置を「差分 × ブースト」分だけ移動させる
+      const rigPos = rig.getAttribute('position');
+      rig.setAttribute('position', {
+        x: rigPos.x + dx * boost,
+        y: rigPos.y + dy * boost,
+        z: rigPos.z + dz * boost
+      });
+
+      lastX = currentPos.x;
+      lastY = currentPos.y;
+      lastZ = currentPos.z;
+    }
+  });
+</script>
   </body>
 </html>

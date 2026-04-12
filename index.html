@@ -1,26 +1,100 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  </head>
-  <body>
-    <a-scene webxr="optionalFeatures: local-floor, bounded-floor">
-      
-      <a-grid></a-grid> 
-      
-      <a-box position="0 1.5 -3" color="#4CC3D9" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"></a-box>
-      <a-sphere position="1 1.2 -4" radius="0.5" color="#EF2D5E"></a-sphere>
-      
-      <a-sky color="#222"></a-sky>
+<head>
+  <meta charset="utf-8">
+  <title>Full Vision Pro Style WebVR</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <style>
+    /* 背面でカメラを動かすための設定 */
+    #input_video { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; }
+    #canvas_output { position: fixed; bottom: 10px; right: 10px; width: 150px; height: 110px; z-index: 10; border: 2px solid white; }
+  </style>
+</head>
+<body>
 
-      <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
-      
-    </a-scene>
+  <video id="input_video"></video>
+  <canvas id="canvas_output"></canvas>
 
-    <script src="https://unpkg.com/aframe-environment-component@1.3.2/dist/aframe-environment-component.min.js"></script>
-    <script>
-      // シーンに地面などの環境を追加
-      document.querySelector('a-scene').setAttribute('environment', 'preset: forest');
-    </script>
-  </body>
+  <a-scene webxr="optionalFeatures: local-floor">
+    <a-sky color="#050505"></a-sky>
+    <a-grid></a-grid>
+
+    <a-sphere id="target-obj" position="0 1.5 -1" radius="0.1" color="orange"></a-sphere>
+
+    <a-sphere id="hand-pointer" position="0 0 0" radius="0.05" color="#00FF00"></a-sphere>
+
+    <a-entity id="rig" position="0 0 0">
+      <a-camera look-controls wasd-controls position="0 1.6 0"></a-camera>
+    </a-entity>
+  </a-scene>
+
+  <script>
+    const videoElement = document.getElementById('input_video');
+    const canvasElement = document.getElementById('canvas_output');
+    const canvasCtx = canvasElement.getContext('2d');
+    const handPointer = document.getElementById('hand-pointer');
+    const cameraEntity = document.querySelector('[camera]');
+
+    // 手の解析結果をVR空間に反映させる関数
+    function onResults(results) {
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        // 右手（最初の1つ）の人差し指の先(index 8)を取得
+        const landmarks = results.multiHandLandmarks[0];
+        const fingerTip = landmarks[8];
+
+        // カメラ座標系からVR空間の座標に変換（簡易計算）
+        // 0.0〜1.0 の値を VRのメートル単位に変換
+        const x = (fingerTip.x - 0.5) * -3; // 左右反転
+        const y = (0.5 - fingerTip.y) * 2 + 1.5; // 高さ調整
+        const z = (fingerTip.z * 2) - 1; // 奥行き
+
+        // カメラ（頭）の位置を取得して、手の位置を相対的に調整
+        const camPos = cameraEntity.object3D.position;
+        handPointer.setAttribute('position', {
+          x: x + camPos.x,
+          y: y,
+          z: z + (camPos.z - 0.5)
+        });
+
+        // 当たり判定：オレンジの球に近づいたら色を変える
+        const target = document.getElementById('target-obj').object3D.position;
+        const dist = Math.sqrt(Math.pow(x - target.x, 2) + Math.pow(y - target.y, 2));
+        if(dist < 0.2) {
+          document.getElementById('target-obj').setAttribute('color', 'red');
+        } else {
+          document.getElementById('target-obj').setAttribute('color', 'orange');
+        }
+      }
+      canvasCtx.restore();
+    }
+
+    // MediaPipe Handsの初期化
+    const hands = new Hands({locateFile: (file) => {
+      return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+    }});
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
+    hands.onResults(onResults);
+
+    // カメラの起動
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await hands.send({image: videoElement});
+      },
+      width: 640,
+      height: 480
+    });
+    camera.start();
+  </script>
+</body>
 </html>

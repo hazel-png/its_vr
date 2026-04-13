@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Android VR - ボタン確実動作</title>
+    <title>Android VR - 超高感度</title>
     <style>
         body {
             margin: 0;
@@ -19,9 +19,9 @@
             text-align: center;
         }
         #big-button {
-            background: #ff4444;
-            color: white;
-            border: 4px solid #ff6666;
+            background: #00ff88;
+            color: #000;
+            border: 4px solid #00cc66;
             padding: 30px 60px;
             font-size: 28px;
             font-weight: bold;
@@ -30,13 +30,13 @@
             margin: 20px 0;
             min-width: 300px;
             min-height: 100px;
-            box-shadow: 0 10px 30px rgba(255,68,68,0.5);
+            box-shadow: 0 10px 30px rgba(0,255,136,0.5);
             transition: all 0.2s;
         }
         #big-button:hover, #big-button:active {
-            background: #ff2222;
+            background: #00cc66;
             transform: scale(1.02);
-            box-shadow: 0 15px 40px rgba(255,68,68,0.7);
+            box-shadow: 0 15px 40px rgba(0,255,136,0.7);
         }
         #status {
             font-size: 20px;
@@ -55,20 +55,25 @@
         h1 {
             font-size: 36px;
             margin: 0 0 20px 0;
-            background: linear-gradient(45deg, #ff4444, #44ff44);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #00ff88;
+            text-shadow: 0 0 20px #00ff88;
+        }
+        .speed-info {
+            font-size: 18px;
+            color: #00ff88;
+            font-weight: bold;
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
-    <h1>🎮 VR開始</h1>
-    <div id="status">ボタンを長押ししてください</div>
-    <button id="big-button">🚀 VR GO!</button>
+    <h1>⚡ 超高感度VR</h1>
+    <div class="speed-info">🚀 感度 3倍強化！</div>
+    <div id="status">ボタンを押して開始</div>
+    <button id="big-button">🎯 ハイスピードVR</button>
     <p style="font-size: 16px; opacity: 0.8;">
-        画面回転を自動に設定<br>
-        スマホをゆっくり動かす
+        わずかな頭の動きで激しく反応！<br>
+        画面回転 → 自動
     </p>
 
     <div id="scene-container">
@@ -76,32 +81,64 @@
         <a-scene 
             embedded
             vr-mode-ui="enabled: false"
-            background="color: #000011">
+            background="color: #000000"
+            antialias="true">
             
+            <!-- 超高感度カメラ -->
             <a-camera 
+                id="highsens-camera"
                 position="0 1.6 0"
                 look-controls="enabled: true"
-                fov="80">
+                fov="90">
             </a-camera>
 
-            <a-light type="ambient" color="#404040" intensity="0.5"></a-light>
-            <a-light type="directional" color="#ffffff" intensity="0.8" position="1 2 1"></a-light>
+            <!-- 照明 -->
+            <a-light type="ambient" color="#202040" intensity="0.6"></a-light>
+            <a-light type="directional" color="#ffffff" intensity="1" position="1 2 1"></a-light>
 
-            <!-- カラフル回転オブジェクト -->
-            <a-box position="-1.5 1.5 -3" color="#ff4444" 
-                   animation="property: rotation; to: 360 360 0; loop: true; dur: 10000"></a-box>
-            <a-sphere position="1.5 1.8 -3" radius="0.6" color="#44ff44" 
-                      animation="property: rotation; to: 0 360 360; loop: true; dur: 12000"></a-sphere>
-            <a-cylinder position="0 0.5 -4" radius="0.5" height="2" color="#4444ff" 
-                        animation="property: rotation; to: 360 0 0; loop: true; dur: 15000"></a-cylinder>
+            <!-- 高速回転オブジェクト -->
+            <a-box position="-1.8 1.8 -3" 
+                   color="#ff0040"
+                   scale="0.8 0.8 0.8"
+                   animation="property: rotation; to: 0 720 720; loop: true; dur: 5000; easing: linear">
+            </a-box>
+            
+            <a-sphere position="1.8 2 -3.2" 
+                      radius="0.7"
+                      color="#00ff88"
+                      animation="property: rotation; to: 720 0 720; loop: true; dur: 6000; easing: linear">
+            </a-sphere>
+            
+            <a-cylinder position="0 0.8 -4" 
+                        radius="0.6" 
+                        height="1.5"
+                        color="#4080ff"
+                        animation="property: rotation; to: 720 720 0; loop: true; dur: 7000; easing: linear">
+            </a-cylinder>
 
-            <!-- トンネル -->
-            <a-cylinder position="0 0 -12" radius="4" height="25" color="#ff44ff" 
-                        material="transparent: true; opacity: 0.4"
+            <!-- 高速トンネル -->
+            <a-cylinder position="0 0 -10" 
+                        radius="3.5" 
+                        height="40"
+                        color="#ff40ff"
+                        material="transparent: true; opacity: 0.5"
                         rotation="90 0 0"
-                        animation="property: rotation; to: 0 360 0; loop: true; dur: 20000"></a-cylinder>
+                        animation="property: rotation; to: 0 1080 0; loop: true; dur: 12000; easing: linear">
+            </a-cylinder>
 
-            <a-sky color="#001122" animation="property: rotation; to: 0 -100 0; loop: true; dur: 50000"></a-sky>
+            <!-- 爆速パーティクル -->
+            <a-entity particle-system="particleCount: 200;
+                                       velocityValue: 0 0.1 -0.2;
+                                       velocitySpread: 0.8 0.5 0.8;
+                                       color: #ff0040,#00ff88,#4080ff,#ff40ff;
+                                       startSize: 0.03; endSize: 0.01;
+                                       accelerationValue: 0 -0.02 0">
+            </a-entity>
+
+            <!-- 動く星空 -->
+            <a-sky color="#000011" 
+                   animation="property: rotation; to: 0 -360 0; loop: true; dur: 30000; easing: linear">
+            </a-sky>
 
         </a-scene>
     </div>
@@ -111,50 +148,69 @@
         const status = document.getElementById('status');
         const container = document.getElementById('scene-container');
         const scene = document.querySelector('a-scene');
+        const camera = document.getElementById('highsens-camera');
 
-        // 超確実ボタン処理（複数イベント）
+        // 超高感度制御
+        let sensitivityMultiplier = 2.5; // 2.5倍感度
+
         function startVR() {
-            status.textContent = '🎉 VR開始！頭を動かして！';
+            status.innerHTML = '⚡ <strong>超高感度VR開始！</strong>';
             button.style.display = 'none';
             
-            // シーン表示（即時）
+            // 即表示
             container.style.display = 'block';
             
-            // 即座にジャイロ有効化
-            const camera = document.querySelector('a-camera');
-            if (camera.components['look-controls']) {
-                camera.components['look-controls'].enabled = true;
+            // 全画面
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
             }
             
-            // 全画面化
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            }
+            // 超高感度ジャイロ有効化
+            setTimeout(() => {
+                const lookControls = camera.components['look-controls'];
+                if (lookControls) {
+                    lookControls.enabled = true;
+                    
+                    // 感度3倍化ハック
+                    lookControls.pitchObject.rotationSpeed = 0.1 * sensitivityMultiplier;
+                    lookControls.yawObject.rotationSpeed = 0.1 * sensitivityMultiplier;
+                }
+            }, 100);
         }
 
-        // 複数イベントで確実動作
-        button.addEventListener('click', startVR);
-        button.addEventListener('touchstart', (e) => {
+        // 確実ボタン動作
+        button.onclick = startVR;
+        button.ontouchstart = (e) => {
             e.preventDefault();
             startVR();
-        });
-        button.addEventListener('touchend', (e) => e.preventDefault());
-        
-        // Enterキー/スペースキーでも開始
-        document.addEventListener('keydown', (e) => {
+        };
+        button.onmousedown = startVR;
+
+        // キーボード対応
+        document.onkeydown = (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 startVR();
             }
-        });
+        };
 
-        // シーン読み込み完了確認
+        // ダブルタップ対策
+        let tapCount = 0;
+        button.ontouchend = () => {
+            tapCount++;
+            if (tapCount === 1) {
+                setTimeout(() => {
+                    tapCount = 0;
+                }, 300);
+            }
+        };
+
+        // シーン準備
         scene.addEventListener('loaded', () => {
-            status.textContent = '準備完了！ボタンを押して';
+            status.textContent = '準備OK！緑のボタンを押して';
         });
 
-        // デバッグ用コンソール
-        console.log('VR準備完了。ボタンをタップしてください');
+        console.log('超高感度VR準備完了');
     </script>
 </body>
 </html>

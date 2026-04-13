@@ -2,225 +2,216 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>頭連動VR - リアル頭部トラッキング</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Android VR - 頭連動</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background: #000;
-            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #000011, #1a0033);
+            font-family: system-ui, -apple-system, sans-serif;
+            touch-action: none;
         }
-        #ui {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: #fff;
-            z-index: 100;
-            background: rgba(0,0,0,0.8);
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 12px;
-            max-width: 200px;
+        #android-ui {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.9);
+            color: #4ecdc4;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 999;
+            backdrop-filter: blur(10px);
+            font-size: 16px;
+            font-weight: 600;
         }
-        #enterVR {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
+        #vr-btn {
             background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            padding: 20px 40px;
+            color: white;
             border: none;
-            border-radius: 20px;
+            padding: 20px 40px;
+            border-radius: 25px;
             font-size: 20px;
             font-weight: bold;
             cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             transition: all 0.3s;
+            touch-action: manipulation;
         }
-        #enterVR:hover {
-            transform: translate(-50%, -50%) scale(1.05);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        #vr-btn:active {
+            transform: scale(0.95);
         }
-        #loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #4ecdc4;
-            font-size: 18px;
-            z-index: 101;
+        #status {
+            margin: 10px 0;
+            font-size: 14px;
         }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div id="loading">ジャイロセンサーを初期化中...</div>
-    <div id="ui">
-        <div>🧭 頭の動き追従: <span id="status">準備中</span></div>
-        <div>FPS: <span id="fps">0</span></div>
-        <div>📱 傾き: <span id="tilt">0°</span></div>
+    <div id="android-ui">
+        <div>🤳 Android VRモード</div>
+        <div id="status">準備完了！</div>
+        <div>Chrome推奨 | ジャイロセンサーON</div>
+        <button id="vr-btn">🚀 VR開始（頭で動かす）</button>
     </div>
-    
-    <button id="enterVR">🎧 頭連動VR開始</button>
 
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-device-orientation-permission-ui-component@1.0.1/dist/aframe-device-orientation-permission-ui-component.min.js"></script>
 
     <a-scene 
+        id="vr-scene"
+        embedded
         vr-mode-ui="enabled: true"
-        background="color: #000011"
-        device-orientation-permission-ui="enabled: true; timeout: 3000"
-        cursor="rayOrigin: mouse; fuse: false"
+        device-orientation-permission-ui="enabled: false"
+        cursor="rayOrigin: mouse"
+        background="color: #000022"
         loading-screen="dotsColor: #4ecdc4; backgroundColor: #000011">
         
-        <!-- メインカメラ（頭の動きに完全連動） -->
+        <!-- Android最適化カメラ -->
         <a-camera 
-            id="headCam"
+            id="androidCam"
             position="0 1.6 0"
-            look-controls="enabled: true; pointerSpeed: 0"
-            device-orientation-permission-ui=""
+            look-controls="enabled: true; reverseMouseWheel: false; pointerSpeed: 0"
             wasd-controls="enabled: false"
-            cursor="fuse: false">
+            fov="80">
             
-            <!-- クロスヘア（照準） -->
-            <a-entity geometry="primitive: ring; radius-inner: 0.01; radius-outer: 0.02" 
-                      material="color: #4ecdc4; shader: flat; opacity: 0.8"
-                      position="0 0 -1"
-                      scale="2 2 2"></a-entity>
+            <!-- Android用クロスヘア -->
+            <a-circle geometry="radius: 0.015" 
+                      material="color: #4ecdc4; opacity: 0.7; shader: flat"
+                      position="0 0 -0.8"
+                      scale="1.5 1.5 1"></a-circle>
         </a-camera>
 
-        <!-- ダイナミックライティング -->
-        <a-light type="ambient" color="#222244" intensity="0.3"></a-light>
-        <a-light type="directional" color="#ffffff" intensity="0.7" position="1 3 1"></a-light>
-        <a-light type="point" color="#ff6b6b" intensity="1" position="-2 2 -3" distance="10"></a-light>
+        <!-- Android高性能ライティング -->
+        <a-light type="ambient" color="#1a1a3a" intensity="0.4"></a-light>
+        <a-light type="directional" color="#ffffff" intensity="0.8" position="2 4 2"></a-light>
+        <a-light type="hemisphere" 
+                 sky-color="#4ecdc4" 
+                 ground-color="#1a0033" 
+                 intensity="0.6"></a-light>
 
-        <!-- 頭の動きに反応するインタラクティブオブジェクト -->
-        <a-sphere id="interactiveSphere" 
-                  position="0 1.6 -3"
-                  radius="0.4"
-                  material="color: #ff6b6b; shader: flat; emissive: #ff6b6b; emissiveIntensity: 0.3; opacity: 0.9"
-                  animation__rotate="property: rotation; to: 0 360 360; loop: true; dur: 15000; easing: linear"
-                  animation__pulse="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dir: alternate; loop: true; dur: 2000">
+        <!-- メインオブジェクト（頭追従インタラクティブ） -->
+        <a-box position="-1.5 1.5 -2.5" 
+               width="0.8" height="0.8" depth="0.8"
+               color="#ff6b6b"
+               class="interactive"
+               material="shader: flat; emissive: #ff6b6b; emissiveIntensity: 0.2"
+               animation="property: rotation; to: 360 360 0; loop: true; dur: 12000">
+        </a-box>
+
+        <a-sphere position="1.5 1.8 -3" 
+                  radius="0.5"
+                  color="#4ecdc4"
+                  class="interactive"
+                  material="shader: flat; emissive: #4ecdc4; emissiveIntensity: 0.3"
+                  animation="property: rotation; to: 0 360 360; loop: true; dur: 10000">
         </a-sphere>
 
-        <!-- 頭の向きに追従する光の軌跡 -->
-        <a-entity id="headTrail">
-            <a-cylinder position="0 1.6 -2" radius="0.1" height="0.3" 
-                        material="color: #4ecdc4; shader: flat; transparent: true; opacity: 0.6"
-                        rotation="-90 0 0"></a-cylinder>
-        </a-entity>
+        <!-- Android高速トンネル -->
+        <a-cylinder position="0 0 -12" 
+                    radius="5" 
+                    height="40"
+                    material="color: #45b7d1; transparent: true; opacity: 0.3; shader: flat"
+                    rotation="90 0 0"
+                    animation="property: rotation; to: 360 0 0; loop: true; dur: 25000">
+        </a-cylinder>
 
-        <!-- 無限トンネル（頭の動きで歪む） -->
-        <a-entity id="tunnel">
-            <a-cylinder position="0 0 -15" radius="6" height="50" 
-                        material="color: linear-gradient(#ff6b6b, #4ecdc4, #45b7d1); shader: flat; transparent: true; opacity: 0.4"
-                        rotation="0 0 0"></a-cylinder>
-        </a-entity>
+        <!-- パーティクルシステム -->
+        <a-entity particle-system="particleCount: 150; 
+                                   velocityValue: 0 0.05 -0.1; 
+                                   velocitySpread: 0.5 0.3 0.5;
+                                   color: #4ecdc4,#ff6b6b,#45b7d1;
+                                   startSize: 0.02; endSize: 0.01"></a-entity>
 
-        <!-- 浮遊パーティクル（頭の動きに反応） -->
-        <a-entity particle-system="particleCount: 200; velocityValue: 0 0.1 0; velocitySpread: 1 0.5 1"></a-entity>
-
-        <!-- 星空ドーム -->
-        <a-sky id="stars" 
-               src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTAwIDUwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDAxMDExIi8+PGNpcmNsZSBjeD0iMTAiIGN5PSI1IiByPSIxIiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjAiIGN5PSIxNSIgci0iMC44IiBmaWxsPSIjZGRmIi8+PGNpcmNsZSBjeD0iMzAiIGN5PSIyNSIgciI9IjEuMiIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjQwIiBjeT0iMzUiIHI9IjAuNSIgZmlsbD0iI2RkZiIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMTAiIHI9IjEiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSI2MCIgY3k9IjQwIiByPSIwLjciIGZpbGw9IiNkZGYiLz48Y2lyY2xlIGN4PSI3MCIgY3k9IjIwIiByPSIxLjEiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSI4MCIgY3k9IjMwIiByPSIwLjkiIGZpbGw9IiNkZGYiLz48Y2lyY2xlIGN4PSI5MCIgY3k9IjQ1IiByPSIxIiBmaWxsPSIjZmZmIi8+PC9zdmc+"
-               animation="property: rotation; to: 0 -60 0; loop: true; dur: 80000; easing: linear">
+        <!-- 美しいグラデーション空 -->
+        <a-sky color="#000022" 
+               animation="property: rotation; to: 0 -45 0; loop: true; dur: 50000">
         </a-sky>
 
     </a-scene>
 
     <script>
-        // 高度な頭部トラッキング制御
-        let scene, camera, statusEl, tiltEl, fpsEl;
-        let lastTime = 0;
-        let frameCount = 0;
+        // Android専用最適化
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const scene = document.getElementById('vr-scene');
+        const ui = document.getElementById('android-ui');
+        const vrBtn = document.getElementById('vr-btn');
+        const status = document.getElementById('status');
 
-        window.addEventListener('load', () => {
-            scene = document.querySelector('a-scene');
-            camera = document.querySelector('#headCam');
-            statusEl = document.getElementById('status');
-            tiltEl = document.getElementById('tilt');
-            fpsEl = document.getElementById('fps');
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('enterVR').style.display = 'block';
+        if (isAndroid) {
+            document.title = 'Android VR - 頭連動';
+            status.textContent = 'Android検出 ✓';
+        }
 
-            // FPS計算
-            scene.addEventListener('renderstart', () => {
-                const now = performance.now();
-                frameCount++;
-                if (now - lastTime >= 1000) {
-                    fpsEl.textContent = Math.round((frameCount * 1000) / (now - lastTime));
-                    frameCount = 0;
-                    lastTime = now;
+        // Android VR開始
+        vrBtn.addEventListener('click', async () => {
+            status.textContent = 'VR起動中...';
+            
+            try {
+                // Android Chrome VRモード
+                if (scene.canEnterVR()) {
+                    await scene.enterVR();
+                    ui.classList.add('hidden');
+                    status.textContent = '🎉 VR開始！頭を動かして！';
+                } else {
+                    // 通常のジャイロモード
+                    scene.sceneEl.cameraEl.components['look-controls'].enabled = true;
+                    ui.classList.add('hidden');
+                    status.textContent = '👤 頭追従モード開始';
+                }
+            } catch (e) {
+                status.textContent = '❌ エラー: ' + e.message;
+            }
+        });
+
+        // 自動VR検出（Android）
+        scene.addEventListener('loaded', () => {
+            if (isAndroid && scene.isMobile) {
+                status.textContent = 'モバイルVR準備完了';
+            }
+        });
+
+        // 頭の動き検出・フィードバック
+        let raycaster;
+        scene.addEventListener('enter-vr', () => {
+            // Android用Raycaster設定
+            raycaster = document.createElement('a-entity');
+            raycaster.setAttribute('raycaster', 'objects: .interactive; far: 15; interval: 0');
+            raycaster.setAttribute('position', '0 0 0');
+            scene.camera.el.appendChild(raycaster);
+
+            // インタラクション
+            raycaster.addEventListener('raycaster-intersection', (e) => {
+                const hit = e.detail.els[0];
+                if (hit) {
+                    hit.setAttribute('material', 'emissiveIntensity: 0.8');
+                    hit.setAttribute('scale', '1.2 1.2 1.2');
+                }
+            });
+
+            raycaster.addEventListener('raycaster-intersection-cleared', (e) => {
+                const hit = e.detail.els[0];
+                if (hit) {
+                    hit.setAttribute('material', 'emissiveIntensity: 0.2');
+                    hit.setAttribute('scale', '1 1 1');
                 }
             });
         });
 
-        // VRボタン
-        document.getElementById('enterVR').addEventListener('click', async () => {
-            try {
-                // デバイスオーエンテーション許可
-                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    const permission = await DeviceOrientationEvent.requestPermission();
-                    if (permission !== 'granted') {
-                        alert('ジャイロセンサー許可が必要です');
-                        return;
-                    }
-                }
-                
-                scene.enterVR();
-                document.getElementById('enterVR').style.display = 'none';
-                statusEl.textContent = '🔥 完全連動中';
-            } catch (e) {
-                console.error('VR開始エラー:', e);
-            }
-        });
+        // タッチ最適化
+        document.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+        }, { passive: false });
 
-        // 頭の動きリアルタイム追跡
-        scene.addEventListener('enter-vr', () => {
-            statusEl.textContent = '🔥 完全連動中';
-        });
-
-        // 頭の傾き表示（デバッグ用）
-        scene.addEventListener('deviceorientation', (event) => {
-            const alpha = event.alpha ? Math.round(event.alpha) : 0;
-            tiltEl.textContent = alpha + '°';
-        });
-
-        // インタラクティブ機能：頭の向きでオブジェクト反応
-        let raycasterEl = document.createElement('a-entity');
-        raycasterEl.setAttribute('raycaster', {
-            objects: '.interactive',
-            far: 10,
-            interval: 0
-        });
-        camera.appendChild(raycasterEl);
-
-        raycasterEl.addEventListener('raycaster-intersection', (evt) => {
-            const intersection = evt.detail.els[0];
-            if (intersection && intersection.id === 'interactiveSphere') {
-                intersection.setAttribute('scale', '1.3 1.3 1.3');
-                intersection.setAttribute('material', 'emissiveIntensity: 1');
-            }
-        });
-
-        raycasterEl.addEventListener('raycaster-intersection-cleared', (evt) => {
-            const intersection = evt.detail.els[0];
-            if (intersection && intersection.id === 'interactiveSphere') {
-                intersection.setAttribute('scale', '1 1 1');
-                intersection.setAttribute('material', 'emissiveIntensity: 0.3');
-            }
-        });
-
-        // 頭の動きに追従するトレイルエフェクト
-        scene.addEventListener('renderstart', () => {
-            const headPos = camera.object3D.position;
-            const trail = document.querySelector('#headTrail');
-            if (trail) {
-                trail.setAttribute('position', `${headPos.x.toFixed(2)} ${headPos.y.toFixed(2)} ${headPos.z.toFixed(2)}`);
-            }
+        // パフォーマンス最適化
+        scene.setAttribute('renderer', {
+            antialias: true,
+            colorManagement: true,
+            sortObjects: true
         });
     </script>
 </body>

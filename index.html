@@ -2,288 +2,159 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Android VR - 高精度版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android VR - ボタン確実動作</title>
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-        }
         body {
             margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background: radial-gradient(circle, #001122 0%, #000011 100%);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 20px;
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
+            text-align: center;
         }
-        #ui {
+        #big-button {
+            background: #ff4444;
+            color: white;
+            border: 4px solid #ff6666;
+            padding: 30px 60px;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 15px;
+            cursor: pointer;
+            margin: 20px 0;
+            min-width: 300px;
+            min-height: 100px;
+            box-shadow: 0 10px 30px rgba(255,68,68,0.5);
+            transition: all 0.2s;
+        }
+        #big-button:hover, #big-button:active {
+            background: #ff2222;
+            transform: scale(1.02);
+            box-shadow: 0 15px 40px rgba(255,68,68,0.7);
+        }
+        #status {
+            font-size: 20px;
+            margin: 20px 0;
+            min-height: 30px;
+        }
+        #scene-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,20,0.98);
-            color: #4ecdc4;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 0.5s;
-        }
-        #ui.hidden {
-            opacity: 0;
-            pointer-events: none;
+            z-index: 1;
+            display: none;
         }
         h1 {
-            font-size: 28px;
+            font-size: 36px;
             margin: 0 0 20px 0;
-            background: linear-gradient(45deg, #4ecdc4, #ff6b6b);
+            background: linear-gradient(45deg, #ff4444, #44ff44);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        #status {
-            font-size: 16px;
-            margin: 20px 0;
-            min-height: 24px;
-        }
-        #start-btn {
-            background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #ffa502);
-            color: white;
-            border: none;
-            padding: 25px 60px;
-            border-radius: 50px;
-            font-size: 24px;
-            font-weight: 700;
-            box-shadow: 
-                0 10px 30px rgba(255,107,107,0.4),
-                0 0 0 1px rgba(255,255,255,0.2) inset;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            min-height: 80px;
-            min-width: 280px;
-            touch-action: manipulation;
-        }
-        #start-btn:active {
-            transform: translateY(2px) scale(0.98);
-            box-shadow: 
-                0 5px 15px rgba(255,107,107,0.6),
-                0 0 0 1px rgba(255,255,255,0.3) inset;
-        }
-        #gyro-info {
-            font-size: 14px;
-            margin-top: 20px;
-            opacity: 0.8;
-            text-align: center;
-            max-width: 300px;
-            line-height: 1.4;
-        }
     </style>
 </head>
 <body>
-    <div id="ui">
-        <h1>🎧 頭連動VR</h1>
-        <div id="status">タップで開始</div>
-        <button id="start-btn">🚀 VR開始</button>
-        <div id="gyro-info">
-            📱 スマホをゆっくり動かして360°体験<br>
-            🔄 画面回転を自動に設定
-        </div>
+    <h1>🎮 VR開始</h1>
+    <div id="status">ボタンを長押ししてください</div>
+    <button id="big-button">🚀 VR GO!</button>
+    <p style="font-size: 16px; opacity: 0.8;">
+        画面回転を自動に設定<br>
+        スマホをゆっくり動かす
+    </p>
+
+    <div id="scene-container">
+        <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+        <a-scene 
+            embedded
+            vr-mode-ui="enabled: false"
+            background="color: #000011">
+            
+            <a-camera 
+                position="0 1.6 0"
+                look-controls="enabled: true"
+                fov="80">
+            </a-camera>
+
+            <a-light type="ambient" color="#404040" intensity="0.5"></a-light>
+            <a-light type="directional" color="#ffffff" intensity="0.8" position="1 2 1"></a-light>
+
+            <!-- カラフル回転オブジェクト -->
+            <a-box position="-1.5 1.5 -3" color="#ff4444" 
+                   animation="property: rotation; to: 360 360 0; loop: true; dur: 10000"></a-box>
+            <a-sphere position="1.5 1.8 -3" radius="0.6" color="#44ff44" 
+                      animation="property: rotation; to: 0 360 360; loop: true; dur: 12000"></a-sphere>
+            <a-cylinder position="0 0.5 -4" radius="0.5" height="2" color="#4444ff" 
+                        animation="property: rotation; to: 360 0 0; loop: true; dur: 15000"></a-cylinder>
+
+            <!-- トンネル -->
+            <a-cylinder position="0 0 -12" radius="4" height="25" color="#ff44ff" 
+                        material="transparent: true; opacity: 0.4"
+                        rotation="90 0 0"
+                        animation="property: rotation; to: 0 360 0; loop: true; dur: 20000"></a-cylinder>
+
+            <a-sky color="#001122" animation="property: rotation; to: 0 -100 0; loop: true; dur: 50000"></a-sky>
+
+        </a-scene>
     </div>
 
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    
-    <a-scene 
-        id="vrscene"
-        vr-mode-ui="enabled: false"
-        background="color: #000022"
-        antialias="true"
-        renderer="colorManagement: true; sortObjects: true"
-        cursor="rayOrigin: mouse; fuse: false">
-        
-        <!-- 高精度カメラ -->
-        <a-camera 
-            id="rig"
-            position="0 1.6 0"
-            look-controls="enabled: false; reverseMouseWheel: false"
-            cursor="fuse: false; rayOrigin: camera">
-        </a-camera>
-
-        <!-- プロ級ライティング -->
-        <a-entity light="type: ambient; color: #2a2a4a; intensity: 0.4"></a-entity>
-        <a-entity light="type: directional; color: #ffffff; intensity: 0.8" 
-                  position="-1 3 2"></a-entity>
-        <a-entity light="type: hemisphere; 
-                        skyColor: #4ecdc4; 
-                        groundColor: #1a0033; 
-                        intensity: 0.5"></a-entity>
-
-        <!-- 高精度インタラクティブ -->
-        <a-sphere id="target1" 
-                  position="-1.2 1.6 -2.8"
-                  radius="0.45"
-                  color="#ff4757"
-                  material="shader: flat; emissive: #ff4757; emissiveIntensity: 0.1; metalness: 0.8"
-                  animation__rot="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"
-                  animation__float="property: position; from: -1.2 1.6 -2.8; to: -1.2 2.2 -2.8; dir: alternate; loop: true; dur: 4000">
-        </a-sphere>
-
-        <a-cylinder id="target2"
-                    position="1.8 1.2 -3.2"
-                    radius="0.4"
-                    height="0.8"
-                    color="#2ed573"
-                    material="shader: flat; emissive: #2ed573; emissiveIntensity: 0.1; metalness: 0.7"
-                    rotation="90 0 0"
-                    animation__rot="property: rotation; to: 360 360 0; loop: true; dur: 10000">
-        </a-cylinder>
-
-        <!-- ダイナミック環境 -->
-        <a-entity id="tunnel"
-                  geometry="primitive: cylinder; radius: 5; height: 35"
-                  material="color: #3742fa; transparent: true; opacity: 0.35; shader: flat"
-                  position="0 0 -12"
-                  rotation="90 0 0"
-                  animation="property: rotation; to: 0 360 0; loop: true; dur: 18000; easing: linear">
-        </a-entity>
-
-        <!-- パーティクル -->
-        <a-entity particle-system="particleCount: 100;
-                                   velocityValue: 0 0.03 -0.08;
-                                   velocitySpread: 0.3 0.2 0.3;
-                                   color: #4ecdc4, #ff4757, #ffa502;
-                                   startSize: 0.015; endSize: 0.005;
-                                   accelerationValue: 0 -0.01 0">
-        </a-entity>
-
-        <!-- グラデーション空 -->
-        <a-sky color="#000a1f" 
-               animation="property: rotation; to: 0 -90 0; loop: true; dur: 45000">
-        </a-sky>
-
-    </a-scene>
-
     <script>
-        // 高精度Android VR制御
-        class AndroidVR {
-            constructor() {
-                this.scene = document.getElementById('vrscene');
-                this.camera = document.getElementById('rig');
-                this.ui = document.getElementById('ui');
-                this.status = document.getElementById('status');
-                this.btn = document.getElementById('start-btn');
-                
-                this.raycaster = null;
-                this.isVR = false;
-                this.init();
+        const button = document.getElementById('big-button');
+        const status = document.getElementById('status');
+        const container = document.getElementById('scene-container');
+        const scene = document.querySelector('a-scene');
+
+        // 超確実ボタン処理（複数イベント）
+        function startVR() {
+            status.textContent = '🎉 VR開始！頭を動かして！';
+            button.style.display = 'none';
+            
+            // シーン表示（即時）
+            container.style.display = 'block';
+            
+            // 即座にジャイロ有効化
+            const camera = document.querySelector('a-camera');
+            if (camera.components['look-controls']) {
+                camera.components['look-controls'].enabled = true;
             }
-
-            init() {
-                // ボタン確実動作
-                this.btn.addEventListener('click', (e) => this.startVR(e), { passive: false });
-                this.btn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }, { passive: false });
-
-                // シーン準備完了
-                this.scene.addEventListener('loaded', () => {
-                    this.status.textContent = '準備完了 ✓';
-                    this.setupRaycaster();
-                });
-
-                // タッチ最適化
-                document.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
-                document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-            }
-
-            async startVR(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                this.status.textContent = 'ジャイロセンサーON...';
-                
-                try {
-                    // 高精度ジャイロ許可
-                    if (DeviceOrientationEvent && DeviceOrientationEvent.requestPermission) {
-                        const permission = await DeviceOrientationEvent.requestPermission();
-                        if (permission === 'granted') {
-                            this.enableHighPrecisionGyro();
-                        }
-                    } else {
-                        // 従来API
-                        window.addEventListener('deviceorientation', this.onDeviceOrientation);
-                    }
-
-                    // ルックコントロール高精度有効化
-                    const lookControls = this.camera.components['look-controls'];
-                    lookControls.enabled = true;
-                    lookControls.pointerSpeed = 0; // マウス干渉なし
-
-                    // 全画面（任意）
-                    if (document.documentElement.requestFullscreen) {
-                        await document.documentElement.requestFullscreen();
-                    }
-
-                    this.ui.classList.add('hidden');
-                    this.status.textContent = '🎉 高精度VR開始！';
-
-                } catch (err) {
-                    console.warn('フォールバックモード:', err);
-                    this.camera.components['look-controls'].enabled = true;
-                    this.ui.classList.add('hidden');
-                }
-            }
-
-            enableHighPrecisionGyro() {
-                window.addEventListener('deviceorientation', (event) => {
-                    if (event.alpha !== null) {
-                        // 高精度角度更新
-                        const lookControls = this.camera.components['look-controls'];
-                        if (lookControls && lookControls.injectDeviceOrientation) {
-                            lookControls.injectDeviceOrientation(event);
-                        }
-                    }
-                });
-            }
-
-            setupRaycaster() {
-                this.raycaster = document.createElement('a-entity');
-                this.raycaster.setAttribute('raycaster', {
-                    objects: '#target1, #target2',
-                    far: 8,
-                    interval: 0,
-                    useWorldCoordinates: true
-                });
-                this.camera.appendChild(this.raycaster);
-
-                // 高精度ヒット検出
-                this.raycaster.addEventListener('raycaster-intersection', (evt) => {
-                    const hit = evt.detail.els[0];
-                    if (hit) {
-                        hit.setAttribute('scale', { x: 1.25, y: 1.25, z: 1.25 });
-                        hit.setAttribute('material', 'emissiveIntensity: 0.9');
-                    }
-                });
-
-                this.raycaster.addEventListener('raycaster-intersection-cleared', (evt) => {
-                    const hit = evt.detail.els[0];
-                    if (hit) {
-                        hit.setAttribute('scale', { x: 1, y: 1, z: 1 });
-                        hit.setAttribute('material', 'emissiveIntensity: 0.1');
-                    }
-                });
+            
+            // 全画面化
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
             }
         }
 
-        // 自動開始
-        window.addEventListener('load', () => {
-            new AndroidVR();
+        // 複数イベントで確実動作
+        button.addEventListener('click', startVR);
+        button.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startVR();
         });
+        button.addEventListener('touchend', (e) => e.preventDefault());
+        
+        // Enterキー/スペースキーでも開始
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                startVR();
+            }
+        });
+
+        // シーン読み込み完了確認
+        scene.addEventListener('loaded', () => {
+            status.textContent = '準備完了！ボタンを押して';
+        });
+
+        // デバッグ用コンソール
+        console.log('VR準備完了。ボタンをタップしてください');
     </script>
 </body>
 </html>
